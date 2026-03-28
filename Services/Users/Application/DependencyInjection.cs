@@ -16,6 +16,8 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         // registers all defined behaviors
         services.AddTransient(typeof(IPipelineBehavior<,>),typeof(CommandValidationBehavior<,>));
+        // adds mappers from aggregates to dtos
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
         return services;
     }
 }
