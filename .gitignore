@@ -1,0 +1,46 @@
+important.txt
+
+# Build results
+*/bin/
+*/obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.up2date
+
+# Visual Studio / IDE
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Package management
+packages/
+*.nupkg
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.ide
+
+# Build output
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+
+appsettings.Development.json
+appsettings.Production.json   # si no quieres subir configuraciones específicas de producción
+
+# Logs
+*.log
+logs/
+
+# Entity Framework Migrations backup
+*.MigrationBackup/

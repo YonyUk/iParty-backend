@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/Users/" />
+  <Folder Name="/Services/Users/API/">
+    <Project Path="Services/Users/API/UsersApi.csproj" />
+  </Folder>
+  <Folder Name="/Services/Users/Application/">
+    <Project Path="Services/Users/Application/UsersApplication.csproj" />
+  </Folder>
+  <Folder Name="/Services/Users/Domain/">
+    <Project Path="Services/Users/Domain/UsersDomain.csproj" />
+  </Folder>
+  <Folder Name="/Services/Users/Infrastructure/">
+    <Project Path="Services/Users/Infrastructure/UsersInfrastructure.csproj" />
+  </Folder>
+  <Project Path="Common/Common.csproj" />
+</Solution>
