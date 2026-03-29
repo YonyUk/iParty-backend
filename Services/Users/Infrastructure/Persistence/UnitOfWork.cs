@@ -31,7 +31,8 @@ public class UnitOfWork : IUnitOfWork
             {
                 var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
                 var notification = Activator.CreateInstance(notificationType,domainEvent);
-                await mediator.Publish(notification,token);
+                if (notification != null)
+                    await mediator.Publish(notification,token);
             }
             
             await transaction.CommitAsync(token);

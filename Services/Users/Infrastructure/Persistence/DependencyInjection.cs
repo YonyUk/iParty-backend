@@ -18,8 +18,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistenceService(this IServiceCollection services,IConfiguration configuration)
     {
-        services.Configure<UserDomainRulesOptions>(configuration.GetSection("UsersDomain"));
-        services.Configure<DatabaseConfigOptions>(configuration.GetSection("Database"));
+        services.Configure<UserDomainRulesOptions>(opt => configuration.GetSection("UsersDomain").Bind(opt));
+        services.Configure<DatabaseConfigOptions>(opt => configuration.GetSection("Database").Bind(opt));
         services.AddScoped<IPasswordHasher,PasswordHasher>();
         services.AddScoped<IUserDomainRulesConfigProvider,UserDomainRulesConfigProvider>();
         services.InjectDatabaseService(configuration);
