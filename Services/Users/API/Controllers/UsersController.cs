@@ -1,9 +1,7 @@
 using MediatR;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Users.Application.Commands;
-using Users.Application.DTOs;
+using Users.Domain;
 
 namespace Users.API.Controllers
 {
@@ -32,9 +30,9 @@ namespace Users.API.Controllers
             return Ok(user);
         }
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] UserRole? role = null)
         {
-            var users = await mediator.Send(new GetUsersCommand());
+            var users = await mediator.Send(role != null ? new GetUsersByRoleCommand((UserRole)role) : new GetUsersCommand());
             return Ok(users);
         }
         [HttpGet("name/{username}")]
