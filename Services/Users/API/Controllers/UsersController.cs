@@ -37,5 +37,19 @@ namespace Users.API.Controllers
             var users = await mediator.Send(new GetUsersCommand());
             return Ok(users);
         }
+        [HttpGet("name/{username}")]
+        public async Task<IActionResult> GetUserByName(string username)
+        {
+            var command = new GetUserByUserNameCommand(username);
+            var user = await mediator.Send(command);
+            return Ok(user);
+        }
+        [HttpGet("email/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            var command = new GetUserByEmailCommand(email);
+            var user = await mediator.Send(command);
+            return Ok(user);
+        }
     }
 }

@@ -10,9 +10,9 @@ public class UserProfile : Profile
     {
 
         CreateMap<User, UserDTO>()
-            .ForCtorParam("userName", opt => opt.MapFrom(src => src.UserName.Value))
-            .ForCtorParam("email", opt => opt.MapFrom(src => src.Email.Value))
-            .ForCtorParam("id", opt => opt.MapFrom(src => src.Id))
-            .ForCtorParam("role", opt => opt.MapFrom(src => src.Role));
+            .ForCtorParam("UserName", opt => opt.MapFrom(src => src.UserName.Value))
+            .ForCtorParam("Email", opt => opt.MapFrom(src => src.Email.Value))
+            .ForCtorParam("Id", opt => opt.MapFrom(src => src.Id))
+            .ForCtorParam("Role", opt => opt.MapFrom(src => src.Role));
     }
 }

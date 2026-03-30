@@ -41,7 +41,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetByEmail(Email email, CancellationToken token = default)
     {
-        var user = await appDbContext.Users.SingleOrDefaultAsync(user => user.Email == email, token);
+        var user = await appDbContext.Users.SingleOrDefaultAsync(user => user.Email.Value == email.Value, token);
         if (user == null)
             throw new UserNotFoundException(nameof(User.Email), email.Value);
         return user;
@@ -57,7 +57,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetByName(UserName username, CancellationToken token = default)
     {
-        var user = await appDbContext.Users.SingleOrDefaultAsync(user => user.UserName == username);
+        var user = await appDbContext.Users.SingleOrDefaultAsync(user => user.UserName.Value == username.Value);
         if (user == null)
             throw new UserNotFoundException(nameof(User.UserName), username.Value);
         return user;
