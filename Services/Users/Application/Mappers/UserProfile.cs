@@ -8,9 +8,11 @@ public class UserProfile : Profile
 {
     public UserProfile()
     {
+
         CreateMap<User, UserDTO>()
-            .MaxDepth(5)
-            .ForMember(dto => dto.UserName, opt => opt.MapFrom(user => user.UserName.Value))
-            .ForMember(dto => dto.Email, opt => opt.MapFrom(user => user.Email.Value));
+            .ForCtorParam("userName", opt => opt.MapFrom(src => src.UserName.Value))
+            .ForCtorParam("email", opt => opt.MapFrom(src => src.Email.Value))
+            .ForCtorParam("id", opt => opt.MapFrom(src => src.Id))
+            .ForCtorParam("role", opt => opt.MapFrom(src => src.Role));
     }
 }

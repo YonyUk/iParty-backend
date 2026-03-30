@@ -12,7 +12,6 @@ namespace Users.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IMediator mediator;
-
         public UsersController(IMediator mediator)
         {
             this.mediator = mediator;
@@ -26,12 +25,11 @@ namespace Users.API.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById(Guid userId,IMapper mapper)
+        public async Task<IActionResult> GetUserById(Guid userId)
         {
             var command = new GetUserByIdCommand(userId);
             var user = await mediator.Send(command);
-            var userDTO = mapper.Map<UserDTO>(user);
-            return Ok(userDTO);
+            return Ok(user);
         }
     }
 }
