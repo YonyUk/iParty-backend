@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Users.API.Middlewares;
 using Users.Application.DependencyInjection;
 using Users.Infrastructure.DependencyInjection;
@@ -17,6 +18,9 @@ builder.Services.AddOpenApiDocument(config =>
 builder.Services.AddControllers(options =>
 {
     options.Conventions.Add(new GlobalRoutePrefixConvention(builder.Configuration));
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 var app = builder.Build();
