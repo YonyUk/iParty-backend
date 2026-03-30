@@ -1,3 +1,4 @@
+using Users.API.Middlewares;
 using Users.Application.DependencyInjection;
 using Users.Infrastructure.DependencyInjection;
 
@@ -5,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceService(builder.Configuration);
+builder.Services.AddTransient<ApplicationExceptionHandlerMiddleware>();
 
 builder.Services.AddOpenApiDocument(config =>
 {
@@ -27,6 +29,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUi();
 }
 
+app.UseMiddleware<ApplicationExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.MapControllers();
 
