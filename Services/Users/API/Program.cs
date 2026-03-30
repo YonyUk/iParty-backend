@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Users.API.Converters;
 using Users.API.Middlewares;
 using Users.Application.DependencyInjection;
 using Users.Infrastructure.DependencyInjection;
@@ -20,7 +21,7 @@ builder.Services.AddControllers(options =>
     options.Conventions.Add(new GlobalRoutePrefixConvention(builder.Configuration));
 }).AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.Converters.Add(new UserRoleJsonConverter());
 });
 
 var app = builder.Build();

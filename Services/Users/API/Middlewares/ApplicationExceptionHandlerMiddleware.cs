@@ -10,6 +10,7 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
     private static readonly Dictionary<Type, int> ExceptionStatusCodeMap = new()
     {
         {typeof(RequiredFieldException),StatusCodes.Status400BadRequest},
+        {typeof(InvalidUserRoleException),StatusCodes.Status400BadRequest},
         {typeof(InvalidEmailException),StatusCodes.Status400BadRequest},
         {typeof(InvalidPasswordException),StatusCodes.Status400BadRequest},
         {typeof(InvalidUserNameException),StatusCodes.Status400BadRequest},
