@@ -20,8 +20,8 @@ namespace Users.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> CreateUser(RegisterUserCommand command)
         {
-            var result = await mediator.Send(command);
-            return Ok(result);
+            await mediator.Send(command);
+            return Created();
         }
 
         [HttpGet("{userId}")]
@@ -30,6 +30,12 @@ namespace Users.API.Controllers
             var command = new GetUserByIdCommand(userId);
             var user = await mediator.Send(command);
             return Ok(user);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await mediator.Send(new GetUsersCommand());
+            return Ok(users);
         }
     }
 }
