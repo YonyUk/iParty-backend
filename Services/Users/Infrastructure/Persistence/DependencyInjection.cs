@@ -10,7 +10,8 @@ using Users.Domain.Services;
 using Users.Infrastructure.Configuration;
 using Users.Infrastructure.Persistence;
 using Users.Infrastructure.Providers;
-using Users.Infrastructure.Security;
+using Users.Infrastructure.Services.Security;
+using Users.Infrastructure.Persistence.Services;
 
 namespace Users.Infrastructure.DependencyInjection;
 
@@ -18,10 +19,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistenceService(this IServiceCollection services,IConfiguration configuration)
     {
+        var securitySection = configuration.GetSection("Security");
         services.Configure<UserDomainRulesOptions>(opt => configuration.GetSection("UsersDomain").Bind(opt));
         services.Configure<DatabaseConfigOptions>(opt => configuration.GetSection("Database").Bind(opt));
+        services.Configure<JwtConfigOptions>(opt => securitySection.GetSection("Jwt").Bind(opt));
         services.AddScoped<IPasswordHasher,PasswordHasher>();
         services.AddScoped<IUserDomainRulesConfigProvider,UserDomainRulesConfigProvider>();
+        services.AddScoped<IUserAuthenticator,UserAuthenticator>();
         services.InjectDatabaseService(configuration);
         services.AddScoped<IUserRepository,UserRepository>();
         services.AddScoped<IUnitOfWork,UnitOfWork>();

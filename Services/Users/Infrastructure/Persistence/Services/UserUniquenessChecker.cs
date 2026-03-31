@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Users.Domain.Services;
 using Users.Domain.ValueObjects;
 
-namespace Users.Infrastructure.Persistence;
+namespace Users.Infrastructure.Persistence.Services;
 
 public class UserUniquenessChecker : IUserUniquenessChecker
 {
