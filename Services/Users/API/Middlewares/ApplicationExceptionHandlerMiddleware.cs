@@ -53,6 +53,14 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
         catch (Exception e)
         {
             logger.LogError(e,"Exception not controlled");
+            var problem = new ProblemDetails
+            {
+                Status = 500,
+                Title = "InternalServerError",
+                Detail = "An unexpected error has occurred",
+                Instance = context.Request.Path
+            };
+            await context.Response.WriteAsJsonAsync(problem);
         }
     }
 }

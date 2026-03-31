@@ -1,7 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Users.Application.Commands;
+using Users.Application.DTOs;
 using Users.Domain;
+using Users.Infrastructure.Configuration;
 
 namespace Users.API.Controllers
 {
@@ -10,9 +13,11 @@ namespace Users.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IMediator mediator;
-        public UsersController(IMediator mediator)
+        private readonly JwtConfigOptions jwtConfigOptions;
+        public UsersController(IMediator mediator,IOptions<JwtConfigOptions> options)
         {
             this.mediator = mediator;
+            jwtConfigOptions = options.Value;
         }
 
         [HttpPost("register")]
@@ -21,7 +26,25 @@ namespace Users.API.Controllers
             await mediator.Send(command);
             return Created();
         }
-
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromForm] LoginUserDTO data)
+        {
+            var command = new LoginUserCommand(data);
+            var response = await mediator.Send(command);
+            if (response.token != null)
+            {
+                var cookiesOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddMinutes(jwtConfigOptions.ExpiresMinutes)
+                };
+                Response.Cookies.Append("access_token",response.token,cookiesOptions);
+                return NoContent();
+            }
+            return Unauthorized(response.message);
+        }
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(Guid userId)
         {
