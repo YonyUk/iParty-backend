@@ -63,13 +63,13 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<IEnumerable<User>> GetUsers()
+    public async Task<IEnumerable<User>> GetUsers(CancellationToken token = default)
     {
         var users = await appDbContext.Users.AsNoTracking().ToListAsync();
         return users;
     }
 
-    public async Task<IEnumerable<User>> GetUsersByRole(UserRole role)
+    public async Task<IEnumerable<User>> GetUsersByRole(UserRole role, CancellationToken token = default)
     {
         var users = await appDbContext.Users.Where(user => user.Role == role).AsNoTracking().ToListAsync();
         return users;
