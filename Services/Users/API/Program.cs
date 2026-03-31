@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Users.API.Converters;
 using Users.API.Middlewares;
 using Users.Application.DependencyInjection;
@@ -33,7 +32,8 @@ if (app.Environment.IsDevelopment())
     app.UseOpenApi();
     app.UseSwaggerUi();
 }
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseMiddleware<ApplicationExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.MapControllers();

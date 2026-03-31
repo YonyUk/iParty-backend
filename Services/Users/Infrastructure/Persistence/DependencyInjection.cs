@@ -12,6 +12,9 @@ using Users.Infrastructure.Persistence;
 using Users.Infrastructure.Providers;
 using Users.Infrastructure.Services.Security;
 using Users.Infrastructure.Persistence.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Users.Infrastructure.DependencyInjection;
 
@@ -27,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IUserDomainRulesConfigProvider,UserDomainRulesConfigProvider>();
         services.AddScoped<IUserAuthenticator,UserAuthenticator>();
         services.InjectDatabaseService(configuration);
+        services.InjectAuthenticationService(configuration);
         services.AddScoped<IUserRepository,UserRepository>();
         services.AddScoped<IUnitOfWork,UnitOfWork>();
         services.AddScoped<IUserUniquenessChecker,UserUniquenessChecker>();
@@ -49,6 +53,33 @@ public static class DependencyInjection
                 options.EnableSensitiveDataLogging();
             
         });
+        return services;
+    }
+    static IServiceCollection InjectAuthenticationService(this IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtConfigSection = configuration.GetSection("Security").GetSection("Jwt");
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtConfigSection.GetValue<string>("Issuer"),
+                    ValidAudience = jwtConfigSection.GetValue<string>("Audience"),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfigSection.GetValue<string>("SecretKey") ?? ""))
+                };
+
+                options.Events = new JwtBearerEvents{
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    }
+                };
+            });
         return services;
     }
 }

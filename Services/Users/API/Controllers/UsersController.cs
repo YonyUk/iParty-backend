@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Users.Application.Commands;
@@ -69,6 +71,15 @@ namespace Users.API.Controllers
         public async Task<IActionResult> GetUserByEmail(string email)
         {
             var command = new GetUserByEmailCommand(email);
+            var user = await mediator.Send(command);
+            return Ok(user);
+        }
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var command = new GetUserByIdCommand(Guid.Parse(userId!));
             var user = await mediator.Send(command);
             return Ok(user);
         }
