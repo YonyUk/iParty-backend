@@ -3,11 +3,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Users.API.DTOs;
 using Users.Application.Commands;
 using Users.Application.DTOs;
 using Users.Domain;
 using Users.Domain.Rules;
-using Users.Domain.ValueObjects;
 using Users.Infrastructure.Configuration;
 
 namespace Users.API.Controllers
@@ -91,6 +91,15 @@ namespace Users.API.Controllers
             var command = new GetUserByIdCommand(Guid.Parse(userId!));
             var user = await mediator.Send(command);
             return Ok(user);
+        }
+        [Authorize]
+        [HttpPut("me/change_password")]
+        public async Task<IActionResult> ChangePassword([FromForm] ChangePasswordDTO data)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var command = new ChangePasswordCommand(Guid.Parse(userId!),data.Password);
+            await mediator.Send(command);
+            return NoContent();
         }
     }
 }
