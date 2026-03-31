@@ -36,11 +36,6 @@ public class User : AggregateRoot<Guid>
         Role = role;
     }
     private User() { }
-    public void ChangeEmail(Email email)
-    {
-        Email = email;
-        AddEvent(new UserEmailChangedEvent(Id, email));
-    }
     public void ChangePassword(HashedPassword hashedPassword)
     {
         HashedPassword = hashedPassword;
