@@ -3,4 +3,4 @@ using Users.Application.DTOs;
 
 namespace Users.Application.Commands;
 
-public record GetUserByUserNameCommand(string UserName):IRequest<UserDTO>;
+public record LoginUserCommand(LoginUserDTO data):IRequest<LoginResponseDTO>;

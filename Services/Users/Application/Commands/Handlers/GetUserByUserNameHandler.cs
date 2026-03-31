@@ -26,7 +26,7 @@ public class GetUserByUserNameHandler : IRequestHandler<GetUserByUserNameCommand
     public async Task<UserDTO> Handle(GetUserByUserNameCommand request, CancellationToken cancellationToken)
     {
         var username = new UserName(request.UserName,provider.UserNameDomainRules);
-        var user = await userRepository.GetByName(username);
+        var user = await userRepository.GetByName(username,cancellationToken);
         return mapper.Map<UserDTO>(user);
     }
 }

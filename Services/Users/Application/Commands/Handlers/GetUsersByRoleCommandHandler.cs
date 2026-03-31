@@ -16,7 +16,7 @@ public class GetUsersByRoleCommandHandler : IRequestHandler<GetUsersByRoleComman
     }
     public async Task<IEnumerable<UserDTO>> Handle(GetUsersByRoleCommand request, CancellationToken cancellationToken)
     {
-        var users = await userRepository.GetUsersByRole(request.Role);
+        var users = await userRepository.GetUsersByRole(request.Role,cancellationToken);
         return mapper.Map<IEnumerable<UserDTO>>(users);
     }
 }

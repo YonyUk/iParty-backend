@@ -18,7 +18,7 @@ public class GetUserByEmailCommandHandler : IRequestHandler<GetUserByEmailComman
     public async Task<UserDTO> Handle(GetUserByEmailCommand request, CancellationToken cancellationToken)
     {
         var email = new Email(request.Email);
-        var user = await userRepository.GetByEmail(email);
+        var user = await userRepository.GetByEmail(email,cancellationToken);
         return mapper.Map<UserDTO>(user);
     }
 }
