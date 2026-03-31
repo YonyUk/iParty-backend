@@ -9,7 +9,7 @@ public interface IUserRepository
     Task<User> GetById(Guid id,CancellationToken token = default);
     Task<User> GetByName(UserName username,CancellationToken token = default);
     Task<User> GetByEmail(Email email,CancellationToken token = default);
-    Task<IEnumerable<User>> GetUsers();
-    Task<IEnumerable<User>> GetUsersByRole(UserRole role);
+    Task<IEnumerable<User>> GetUsers(CancellationToken token = default);
+    Task<IEnumerable<User>> GetUsersByRole(UserRole role,CancellationToken token = default);
     Task Delete(Guid id,CancellationToken token = default);
 }
