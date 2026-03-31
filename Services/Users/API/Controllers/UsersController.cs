@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using Users.Application.Commands;
 using Users.Application.DTOs;
 using Users.Domain;
+using Users.Domain.Rules;
+using Users.Domain.ValueObjects;
 using Users.Infrastructure.Configuration;
 
 namespace Users.API.Controllers
@@ -15,11 +17,18 @@ namespace Users.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IMediator mediator;
+        private readonly IUserDomainRulesConfigProvider userDomainRulesConfigProvider;
         private readonly JwtConfigOptions jwtConfigOptions;
-        public UsersController(IMediator mediator,IOptions<JwtConfigOptions> options)
+        public UsersController
+        (
+            IMediator mediator,
+            IOptions<JwtConfigOptions> options,
+            IUserDomainRulesConfigProvider userDomainRulesConfigProvider
+        )
         {
             this.mediator = mediator;
             jwtConfigOptions = options.Value;
+            this.userDomainRulesConfigProvider = userDomainRulesConfigProvider;
         }
 
         [HttpPost("register")]
@@ -42,7 +51,7 @@ namespace Users.API.Controllers
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTime.UtcNow.AddMinutes(jwtConfigOptions.ExpiresMinutes)
                 };
-                Response.Cookies.Append("access_token",response.token,cookiesOptions);
+                Response.Cookies.Append("access_token", response.token, cookiesOptions);
                 return NoContent();
             }
             return Unauthorized(response.message);
