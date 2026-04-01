@@ -33,7 +33,7 @@ public class UserRepository : IUserRepository
 
     public async Task Delete(Guid id, CancellationToken token = default)
     {
-        var user = await appDbContext.Users.FindAsync(new { id }, token);
+        var user = await appDbContext.Users.FindAsync(id, token);
         if (user == null)
             throw new UserNotFoundException(nameof(User.Id), id.ToString());
         appDbContext.Users.Remove(user);
