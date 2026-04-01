@@ -13,6 +13,12 @@ public class User : AggregateRoot<Guid>
     public User(UserName username, Email email, HashedPassword hashedPassword, UserRole role = UserRole.User)
     : base(Guid.NewGuid())
     {
+        if (username == null)
+            throw new ArgumentNullException("username","username param can't be null");
+        if (email == null)
+            throw new ArgumentNullException("email","email param can't be null");
+        if (hashedPassword == null)
+            throw new ArgumentNullException("hashedPassword","hashedPassword param can't be null");
         UserName = username;
         Email = email;
         HashedPassword = hashedPassword;
