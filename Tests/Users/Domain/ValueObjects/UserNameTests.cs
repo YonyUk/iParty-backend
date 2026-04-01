@@ -14,7 +14,7 @@ public class UserNameTests
     [InlineData("yony",false)]
     [InlineData(null,false)]
     [InlineData("      ",false)]
-    public void TestCreateUser(string? username,bool valid)
+    public void TestCreateUserName(string? username,bool valid)
     {
         var action = () =>
         {
