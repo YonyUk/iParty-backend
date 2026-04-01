@@ -13,12 +13,18 @@ public class UserNameTests
     [InlineData("yonyuk",true)]
     [InlineData("yony",false)]
 <<<<<<< HEAD
+<<<<<<< HEAD
     [InlineData(null,false)]
     [InlineData("      ",false)]
     public void TestCreateUserName(string? username,bool valid)
 =======
     public void TestCreateUser(string username,bool valid)
 >>>>>>> 2bc2bc6 (adds User creation test)
+=======
+    [InlineData(null,false)]
+    [InlineData("      ",false)]
+    public void TestCreateUser(string? username,bool valid)
+>>>>>>> 281688d (expands UserNameTests)
     {
         var action = () =>
         {
