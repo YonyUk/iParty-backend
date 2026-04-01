@@ -27,4 +27,13 @@ public class UserNameTests
         else
             action.Should().Throw<InvalidUserNameException>();
     }
+    [Theory]
+    [InlineData("yonyuk","yonyuk",true)]
+    [InlineData("yonyuk","yony01uk",false)]
+    public void TestUserNameEquality(string username1,string username2,bool equals)
+    {
+        var usernameObject1 = new UserName(username1,rules);
+        var usernameObject2 = new UserName(username2,rules);
+        (usernameObject1 == usernameObject2).Should().Be(equals ? true : false);
+    }
 }
