@@ -23,6 +23,7 @@ public class HashedPasswordTests
         else
             action.Should().Throw<InvalidHashedPasswordException>();
     }
+<<<<<<< HEAD
     [Theory]
     [InlineData("aksdsgffdhsf","aksdsgffdhsf",true)]
     [InlineData("aksdsgffdhsf","aksdsgffdhsf1",false)]
@@ -32,4 +33,6 @@ public class HashedPasswordTests
         var hashedpasswordObject2 = new HashedPassword(hash2);
         (hashedpasswordObject1 == hashedpasswordObject2).Should().Be(equals ? true : false);
     }
+=======
+>>>>>>> 6d28122 (adds HashedPassword tests)
 }
