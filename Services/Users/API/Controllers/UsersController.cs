@@ -17,18 +17,15 @@ namespace Users.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IMediator mediator;
-        private readonly IUserDomainRulesConfigProvider userDomainRulesConfigProvider;
         private readonly JwtConfigOptions jwtConfigOptions;
         public UsersController
         (
             IMediator mediator,
-            IOptions<JwtConfigOptions> options,
-            IUserDomainRulesConfigProvider userDomainRulesConfigProvider
+            IOptions<JwtConfigOptions> options
         )
         {
             this.mediator = mediator;
             jwtConfigOptions = options.Value;
-            this.userDomainRulesConfigProvider = userDomainRulesConfigProvider;
         }
 
         [HttpPost("register")]
@@ -99,6 +96,13 @@ namespace Users.API.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var command = new ChangePasswordCommand(Guid.Parse(userId!),data.Password);
             await mediator.Send(command);
+            return NoContent();
+        }
+        [Authorize]
+        [HttpDelete("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            Response.Cookies.Delete("access_token");
             return NoContent();
         }
     }
