@@ -7,7 +7,6 @@ using Users.API.DTOs;
 using Users.Application.Commands;
 using Users.Application.DTOs;
 using Users.Domain;
-using Users.Domain.Rules;
 using Users.Infrastructure.Configuration;
 
 namespace Users.API.Controllers
@@ -49,7 +48,7 @@ namespace Users.API.Controllers
                     Expires = DateTime.UtcNow.AddMinutes(jwtConfigOptions.ExpiresMinutes)
                 };
                 Response.Cookies.Append("access_token", response.token, cookiesOptions);
-                return NoContent();
+                return Accepted();
             }
             return Unauthorized(response.message);
         }
@@ -96,14 +95,23 @@ namespace Users.API.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var command = new ChangePasswordCommand(Guid.Parse(userId!),data.Password);
             await mediator.Send(command);
-            return NoContent();
+            return Accepted();
         }
         [Authorize]
         [HttpDelete("logout")]
         public async Task<IActionResult> Logout()
         {
             Response.Cookies.Delete("access_token");
-            return NoContent();
+            return Accepted();
+        }
+        [Authorize]
+        [HttpDelete("me")]
+        public async Task<IActionResult> UnRegister()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var command = new UnRegisterUserCommand(Guid.Parse(userId!));
+            await mediator.Send(command);
+            return Accepted();
         }
     }
 }
