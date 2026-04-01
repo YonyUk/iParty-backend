@@ -12,7 +12,9 @@ public class UserNameTests
     [Theory]
     [InlineData("yonyuk",true)]
     [InlineData("yony",false)]
-    public void TestCreateUser(string username,bool valid)
+    [InlineData(null,false)]
+    [InlineData("      ",false)]
+    public void TestCreateUser(string? username,bool valid)
     {
         var action = () =>
         {
