@@ -42,6 +42,9 @@ public class UserNameTests
             action.Should().Throw<InvalidUserNameException>();
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9f17f11 (adds test for value objects equalities)
     [Theory]
     [InlineData("yonyuk","yonyuk",true)]
     [InlineData("yonyuk","yony01uk",false)]
@@ -51,6 +54,9 @@ public class UserNameTests
         var usernameObject2 = new UserName(username2,rules);
         (usernameObject1 == usernameObject2).Should().Be(equals ? true : false);
     }
+<<<<<<< HEAD
 =======
 >>>>>>> 2bc2bc6 (adds User creation test)
+=======
+>>>>>>> 9f17f11 (adds test for value objects equalities)
 }
