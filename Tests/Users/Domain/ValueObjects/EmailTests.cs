@@ -24,6 +24,7 @@ public class EmailTests
         else
             action.Should().Throw<InvalidEmailException>();
     }
+<<<<<<< HEAD
     [Theory]
     [InlineData("user@gmail.com","user@gmail.com",true)]
     [InlineData("user@gmail.com","test@gmail.com",false)]
@@ -33,4 +34,6 @@ public class EmailTests
         var emailObject2 = new Email(email2);
         (emailObject1 == emailObject2).Should().Be(equals ? true : false);
      }
+=======
+>>>>>>> b281421 (adds Email creation tests)
 }

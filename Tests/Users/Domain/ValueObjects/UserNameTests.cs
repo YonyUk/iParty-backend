@@ -23,8 +23,12 @@ public class UserNameTests
 =======
     [InlineData(null,false)]
     [InlineData("      ",false)]
+<<<<<<< HEAD
     public void TestCreateUser(string? username,bool valid)
 >>>>>>> 281688d (expands UserNameTests)
+=======
+    public void TestCreateUserName(string? username,bool valid)
+>>>>>>> b281421 (adds Email creation tests)
     {
         var action = () =>
         {
