@@ -1,13 +1,13 @@
 using FluentValidation;
 using MediatR;
 
-namespace Users.Application.Commands.Validators;
+namespace Users.Application.ValidationBehaviors;
 
-public class CommandValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
 where TRequest : IRequest<TResponse>
 {
     private readonly IEnumerable<IValidator<TRequest>> validators;
-    public CommandValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
     {
         this.validators = validators;
     }
