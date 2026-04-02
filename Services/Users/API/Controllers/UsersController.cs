@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Users.API.DTOs;
 using Users.Application.Commands;
 using Users.Application.DTOs;
+using Users.Application.Querys;
 using Users.Domain;
 using Users.Infrastructure.Configuration;
 
@@ -55,28 +56,28 @@ namespace Users.API.Controllers
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(Guid userId)
         {
-            var command = new GetUserByIdCommand(userId);
-            var user = await mediator.Send(command);
+            var query = new GetUserByIdQuery(userId);
+            var user = await mediator.Send(query);
             return Ok(user);
         }
         [HttpGet]
         public async Task<IActionResult> GetUsers([FromQuery] UserRole? role = null)
         {
-            var users = await mediator.Send(role != null ? new GetUsersByRoleCommand((UserRole)role) : new GetUsersCommand());
+            var users = await mediator.Send(role != null ? new GetUsersByRoleQuery((UserRole)role) : new GetUsersQuery());
             return Ok(users);
         }
         [HttpGet("name/{username}")]
         public async Task<IActionResult> GetUserByName(string username)
         {
-            var command = new GetUserByUserNameCommand(username);
-            var user = await mediator.Send(command);
+            var query = new GetUserByUserNameQuery(username);
+            var user = await mediator.Send(query);
             return Ok(user);
         }
         [HttpGet("email/{email}")]
         public async Task<IActionResult> GetUserByEmail(string email)
         {
-            var command = new GetUserByEmailCommand(email);
-            var user = await mediator.Send(command);
+            var query = new GetUserByEmailQuery(email);
+            var user = await mediator.Send(query);
             return Ok(user);
         }
         [Authorize]
@@ -84,8 +85,8 @@ namespace Users.API.Controllers
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var command = new GetUserByIdCommand(Guid.Parse(userId!));
-            var user = await mediator.Send(command);
+            var query = new GetUserByIdQuery(Guid.Parse(userId!));
+            var user = await mediator.Send(query);
             return Ok(user);
         }
         [Authorize]
