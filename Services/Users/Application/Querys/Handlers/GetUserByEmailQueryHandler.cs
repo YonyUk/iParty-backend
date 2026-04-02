@@ -4,18 +4,18 @@ using Users.Application.DTOs;
 using Users.Domain;
 using Users.Domain.ValueObjects;
 
-namespace Users.Application.Commands.Handlers;
+namespace Users.Application.Querys.Handlers;
 
-public class GetUserByEmailCommandHandler : IRequestHandler<GetUserByEmailCommand, UserDTO>
+public class GetUserByEmailQueryHandler : IRequestHandler<GetUserByEmailQuery, UserDTO>
 {
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
-    public GetUserByEmailCommandHandler(IUserRepository userRepository,IMapper mapper)
+    public GetUserByEmailQueryHandler(IUserRepository userRepository,IMapper mapper)
     {
         this.userRepository = userRepository;
         this.mapper = mapper;
     }
-    public async Task<UserDTO> Handle(GetUserByEmailCommand request, CancellationToken cancellationToken)
+    public async Task<UserDTO> Handle(GetUserByEmailQuery request, CancellationToken cancellationToken)
     {
         var email = new Email(request.Email);
         var user = await userRepository.GetByEmail(email,cancellationToken);

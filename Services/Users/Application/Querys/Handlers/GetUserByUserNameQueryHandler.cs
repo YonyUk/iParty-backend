@@ -5,14 +5,14 @@ using Users.Domain;
 using Users.Domain.Rules;
 using Users.Domain.ValueObjects;
 
-namespace Users.Application.Commands.Handlers;
+namespace Users.Application.Querys.Handlers;
 
-public class GetUserByUserNameHandler : IRequestHandler<GetUserByUserNameCommand, UserDTO>
+public class GetUserByUserNameQueryHandler : IRequestHandler<GetUserByUserNameQuery, UserDTO>
 {
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
     private readonly IUserDomainRulesConfigProvider provider;
-    public GetUserByUserNameHandler
+    public GetUserByUserNameQueryHandler
     (
         IUserRepository userRepository,
         IMapper mapper,
@@ -23,7 +23,7 @@ public class GetUserByUserNameHandler : IRequestHandler<GetUserByUserNameCommand
         this.mapper = mapper;
         this.provider = provider;
     }
-    public async Task<UserDTO> Handle(GetUserByUserNameCommand request, CancellationToken cancellationToken)
+    public async Task<UserDTO> Handle(GetUserByUserNameQuery request, CancellationToken cancellationToken)
     {
         var username = new UserName(request.UserName,provider.UserNameDomainRules);
         var user = await userRepository.GetByName(username,cancellationToken);
