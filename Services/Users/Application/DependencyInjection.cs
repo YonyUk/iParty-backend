@@ -2,7 +2,7 @@ using System.Reflection;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Users.Application.Commands.Validators;
+using Users.Application.ValidationBehaviors;
 
 namespace Users.Application.DependencyInjection;
 
@@ -15,7 +15,7 @@ public static class DependencyInjection
         // registers FluentValidation's validators from current Assembly
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         // registers all defined behaviors
-        services.AddTransient(typeof(IPipelineBehavior<,>),typeof(CommandValidationBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidationBehavior<,>));
         // adds mappers from aggregates to dtos
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         return services;
