@@ -12,23 +12,9 @@ public class UserNameTests
     [Theory]
     [InlineData("yonyuk",true)]
     [InlineData("yony",false)]
-<<<<<<< HEAD
-<<<<<<< HEAD
     [InlineData(null,false)]
     [InlineData("      ",false)]
     public void TestCreateUserName(string? username,bool valid)
-=======
-    public void TestCreateUser(string username,bool valid)
->>>>>>> 2bc2bc6 (adds User creation test)
-=======
-    [InlineData(null,false)]
-    [InlineData("      ",false)]
-<<<<<<< HEAD
-    public void TestCreateUser(string? username,bool valid)
->>>>>>> 281688d (expands UserNameTests)
-=======
-    public void TestCreateUserName(string? username,bool valid)
->>>>>>> b281421 (adds Email creation tests)
     {
         var action = () =>
         {
@@ -41,10 +27,7 @@ public class UserNameTests
         else
             action.Should().Throw<InvalidUserNameException>();
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9f17f11 (adds test for value objects equalities)
+
     [Theory]
     [InlineData("yonyuk","yonyuk",true)]
     [InlineData("yonyuk","yony01uk",false)]
@@ -54,9 +37,4 @@ public class UserNameTests
         var usernameObject2 = new UserName(username2,rules);
         (usernameObject1 == usernameObject2).Should().Be(equals ? true : false);
     }
-<<<<<<< HEAD
-=======
->>>>>>> 2bc2bc6 (adds User creation test)
-=======
->>>>>>> 9f17f11 (adds test for value objects equalities)
 }
