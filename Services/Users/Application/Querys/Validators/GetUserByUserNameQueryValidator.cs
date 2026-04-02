@@ -1,9 +1,9 @@
 using FluentValidation;
 using Users.Domain.Rules;
 
-namespace Users.Application.Commands.Validators;
+namespace Users.Application.Querys.Validators;
 
-public class GetUserByUserNameCommandValidator : AbstractValidator<GetUserByUserNameCommand>
+public class GetUserByUserNameCommandValidator : AbstractValidator<GetUserByUserNameQuery>
 {
     public GetUserByUserNameCommandValidator(IUserDomainRulesConfigProvider provider)
     {
