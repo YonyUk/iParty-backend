@@ -7,8 +7,6 @@ using Users.Application.Querys;
 using Users.Application.Querys.Handlers;
 using Users.Domain;
 using Users.Domain.Aggregates;
-using Users.Domain.Rules;
-using Users.Domain.ValueObjects;
 
 namespace Tests.Unit.Users.Application.Queries.Handlers;
 
@@ -31,7 +29,7 @@ public class GetUsersByRoleQueryHandlerTests
     public async Task TestGetUsersByRole(UserRole role)
     {
         var expectedUsers = users.Where(user => user.Role == role);
-        userRepository.GetUsersByRole(role).Returns(expectedUsers);
+        userRepository.GetUsersByRole(role,Arg.Any<CancellationToken>()).Returns(expectedUsers);
 
         var query = new GetUsersByRoleQuery(role);
         var handler = new GetUsersByRoleQueryHandler(userRepository,mapper);

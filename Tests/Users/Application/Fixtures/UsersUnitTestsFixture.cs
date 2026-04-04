@@ -28,6 +28,19 @@ public class UsersUnitTestsFixture : IAsyncLifetime
                     )
                 )
             );
+        MockedMapper.Map<UserDTO>(Arg.Any<User>())
+            .Returns(
+                callinfo =>
+                {
+                    var user = callinfo.Arg<User>();
+                    return new UserDTO(
+                        user.Id,
+                        user.UserName.Value,
+                        user.Email.Value,
+                        user.Role
+                    );
+                }
+            );
     }
     public Task DisposeAsync() => Task.CompletedTask;
 
