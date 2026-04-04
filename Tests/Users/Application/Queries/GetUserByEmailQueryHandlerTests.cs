@@ -15,14 +15,14 @@ using Users.Domain.ValueObjects;
 namespace Tests.Unit.Users.Application.Queries.Handlers;
 
 [Collection("Users Collection Fixture For Unit Testing On Application Layer")]
-public class GetUserByIdQueryHandlerTests
+public class GetUserByEmailQueryHandlerTests
 {
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
     private readonly UserNameDomainRules rules = new UserNameDomainRules(6, 10);
     private readonly User user;
     private readonly UserDTO userExpected;
-    public GetUserByIdQueryHandlerTests(UsersUnitTestsFixture fixture)
+    public GetUserByEmailQueryHandlerTests(UsersUnitTestsFixture fixture)
     {
         userRepository = Substitute.For<IUserRepository>();
         mapper = fixture.MockedMapper;
@@ -36,21 +36,21 @@ public class GetUserByIdQueryHandlerTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task TestGetUserById(bool exists)
+    public async Task TestGetUserByEmail(bool exists)
     {
         if (exists)
-            userRepository.GetById(user.Id,Arg.Any<CancellationToken>()).Returns(user);
+            userRepository.GetByEmail(user.Email,Arg.Any<CancellationToken>()).Returns(user);
         else
-            userRepository.GetById(Arg.Any<Guid>(),Arg.Any<CancellationToken>())
-                .ThrowsAsync(new UserNotFoundException("Id",user.Id.ToString()));
+            userRepository.GetByEmail(Arg.Any<Email>(),Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("Email",user.Email.Value));
 
-        var query = new GetUserByIdQuery(user.Id);
-        var handler = new GetUserByIdQueryHandler(userRepository,mapper);
+        var query = new GetUserByEmailQuery(user.Email.Value);
+        var handler = new GetUserByEmailQueryHandler(userRepository,mapper);
 
         var action = async () =>
         {
             var userResult = await handler.Handle(query,CancellationToken.None);
-            await userRepository.Received(1).GetById(user.Id,Arg.Any<CancellationToken>());
+            await userRepository.Received(1).GetByEmail(user.Email,Arg.Any<CancellationToken>());
             mapper.Received(1).Map<UserDTO>(user);
             userResult.Should().Be(userExpected);
         };
