@@ -38,5 +38,10 @@ public class UserAuthenticatorTests
         jwt.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value.Should().Be(user.Id.ToString());
         jwt.Claims.First(c => c.Type == ClaimTypes.Email).Value.Should().Be(user.Email.Value);
         jwt.Claims.First(c => c.Type == ClaimTypes.Role).Value.Should().Be(user.Role.ToString());
+        jwt.Issuer.Should().Be("test");
+        jwt.Audiences.Should().Contain( e => e == "test");
+        var expirationTime = jwt.ValidTo;
+        var expiresAt = DateTime.UtcNow.AddMinutes(options.Value.ExpiresMinutes);
+        expirationTime.Should().BeCloseTo(expiresAt,TimeSpan.FromSeconds(2));
     }
 }
