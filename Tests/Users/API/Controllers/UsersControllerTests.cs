@@ -15,6 +15,8 @@ using Users.Domain.Rules;
 using Users.Domain.ValueObjects;
 using Users.Domain.Aggregates;
 using Users.Application.Querys;
+using System.Security.Claims;
+using Users.API.DTOs;
 
 namespace Tests.Unit.Users.API.Controllers;
 
@@ -119,13 +121,12 @@ public class UsersControllerTests
 
         if (exists)
         {
-            var username = new UserName("yonyuk", rules);
-            var email = new Email("user@gmail.com");
-            var hash = new HashedPassword("hash");
-            var user = new User(username, email, hash);
+            var username = "yonyuk";
+            var email = "user@gmail.com";
+            var user = new UserDTO(Guid.NewGuid(),username, email, UserRole.User);
 
             mediator.Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>())
-                .Returns(new UserDTO(user.Id, user.UserName.Value, user.Email.Value, user.Role));
+                .Returns(user);
         }
         else
             mediator.Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>())
@@ -148,22 +149,21 @@ public class UsersControllerTests
     [InlineData(false)]
     public async Task TestGetUserByEmail(bool exists)
     {
-        var email = new Email("user@gmail.com");
+        var email = "user@gmail.com";
 
         if (exists)
         {
-            var username = new UserName("yonyuk", rules);
-            var hash = new HashedPassword("hash");
-            var user = new User(username, email, hash);
+            var username = "yonyuk";
+            var user = new UserDTO(Guid.NewGuid(),username, email, UserRole.User);
 
             mediator.Send(Arg.Any<GetUserByEmailQuery>(), Arg.Any<CancellationToken>())
-                .Returns(new UserDTO(user.Id, user.UserName.Value, user.Email.Value, user.Role));
+                .Returns(user);
         }
         else
             mediator.Send(Arg.Any<GetUserByEmailQuery>(), Arg.Any<CancellationToken>())
-                .ThrowsAsync(new UserNotFoundException("email", email.Value));
+                .ThrowsAsync(new UserNotFoundException("email", email));
 
-        var action = async () => await controller.GetUserByEmail(email.Value);
+        var action = async () => await controller.GetUserByEmail(email);
 
         if (exists)
         {
@@ -180,22 +180,21 @@ public class UsersControllerTests
     [InlineData(false)]
     public async Task TestGetUserByName(bool exists)
     {
-        var username = new UserName("yonyuk", rules);
+        var username = "yonyuk";
 
         if (exists)
         {
-            var email = new Email("user@gmail.com");
-            var hash = new HashedPassword("hash");
-            var user = new User(username, email, hash);
+            var email = "user@gmail.com";
+            var user = new UserDTO(Guid.NewGuid(),username, email, UserRole.User);
 
             mediator.Send(Arg.Any<GetUserByUserNameQuery>(), Arg.Any<CancellationToken>())
-                .Returns(new UserDTO(user.Id, user.UserName.Value, user.Email.Value, user.Role));
+                .Returns(user);
         }
         else
             mediator.Send(Arg.Any<GetUserByUserNameQuery>(), Arg.Any<CancellationToken>())
-                .ThrowsAsync(new UserNotFoundException("username", username.Value));
+                .ThrowsAsync(new UserNotFoundException("username", username));
 
-        var action = async () => await controller.GetUserByName(username.Value);
+        var action = async () => await controller.GetUserByName(username);
 
         if (exists)
         {
@@ -205,5 +204,64 @@ public class UsersControllerTests
         }
         else
             await action.Should().ThrowAsync<UserNotFoundException>();
+    }
+
+    [Fact]
+    public async Task TestGetCurrentUser()
+    {
+        var id = Guid.NewGuid();
+        var context = new DefaultHttpContext();
+        var contextUserMocked = Substitute.For<ClaimsPrincipal>();
+        contextUserMocked.FindFirst(ClaimTypes.NameIdentifier)
+            .Returns(new Claim(ClaimTypes.NameIdentifier,id.ToString()));
+        context.User = contextUserMocked;
+        controller.ControllerContext = new ControllerContext { HttpContext = context };
+
+        var username = "yonyuk";
+        var email = "user@gmail.com";
+
+        var user = new UserDTO(id,username,email,UserRole.User);
+
+        mediator.Send(Arg.Any<GetUserByIdQuery>(),Arg.Any<CancellationToken>()).Returns(user);
+
+        var result = await controller.GetCurrentUser();
+        result.Should().BeOfType<OkObjectResult>();
+        await mediator.Received(1).Send(Arg.Any<GetUserByIdQuery>(),Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestChangePassword(bool exists)
+    {
+        var id = Guid.NewGuid();
+        var context = new DefaultHttpContext();
+        var contextUserMocked = Substitute.For<ClaimsPrincipal>();
+        contextUserMocked.FindFirst(ClaimTypes.NameIdentifier)
+            .Returns(new Claim(ClaimTypes.NameIdentifier,id.ToString()));
+        context.User = contextUserMocked;
+        controller.ControllerContext = new ControllerContext { HttpContext = context };
+
+        var data = new ChangePasswordDTO
+        {
+            Password = "new password",
+            Confirm = "new password"
+        };
+
+        if (!exists)
+            mediator.Send(Arg.Any<ChangePasswordCommand>(),Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("id",id.ToString()));
+
+        var action = async () => await controller.ChangePassword(data);
+
+        if (!exists)
+            await action.Should().ThrowAsync<UserNotFoundException>();
+        else
+        {
+            var result = await action();
+            result.Should().BeOfType<AcceptedResult>();
+            await mediator.Received(1).Send(Arg.Any<ChangePasswordCommand>(),Arg.Any<CancellationToken>());
+        }
+
     }
 }
