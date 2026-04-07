@@ -124,20 +124,84 @@ public class UsersControllerTests
             var hash = new HashedPassword("hash");
             var user = new User(username, email, hash);
 
-            mediator.Send(Arg.Any<GetUserByIdQuery>(),Arg.Any<CancellationToken>())
-                .Returns(new UserDTO(user.Id,user.UserName.Value,user.Email.Value,user.Role));
+            mediator.Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>())
+                .Returns(new UserDTO(user.Id, user.UserName.Value, user.Email.Value, user.Role));
         }
         else
             mediator.Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>())
                 .ThrowsAsync(new UserNotFoundException("id", "id"));
-        
+
         var action = async () => await controller.GetUserById(Guid.NewGuid());
 
         if (exists)
         {
             var result = await action();
             result.Should().BeOfType<OkObjectResult>();
-            await mediator.Received(1).Send(Arg.Any<GetUserByIdQuery>(),Arg.Any<CancellationToken>());
+            await mediator.Received(1).Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>());
+        }
+        else
+            await action.Should().ThrowAsync<UserNotFoundException>();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestGetUserByEmail(bool exists)
+    {
+        var email = new Email("user@gmail.com");
+
+        if (exists)
+        {
+            var username = new UserName("yonyuk", rules);
+            var hash = new HashedPassword("hash");
+            var user = new User(username, email, hash);
+
+            mediator.Send(Arg.Any<GetUserByEmailQuery>(), Arg.Any<CancellationToken>())
+                .Returns(new UserDTO(user.Id, user.UserName.Value, user.Email.Value, user.Role));
+        }
+        else
+            mediator.Send(Arg.Any<GetUserByEmailQuery>(), Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("email", email.Value));
+
+        var action = async () => await controller.GetUserByEmail(email.Value);
+
+        if (exists)
+        {
+            var result = await action();
+            result.Should().BeOfType<OkObjectResult>();
+            await mediator.Received(1).Send(Arg.Any<GetUserByEmailQuery>(), Arg.Any<CancellationToken>());
+        }
+        else
+            await action.Should().ThrowAsync<UserNotFoundException>();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestGetUserByName(bool exists)
+    {
+        var username = new UserName("yonyuk", rules);
+
+        if (exists)
+        {
+            var email = new Email("user@gmail.com");
+            var hash = new HashedPassword("hash");
+            var user = new User(username, email, hash);
+
+            mediator.Send(Arg.Any<GetUserByUserNameQuery>(), Arg.Any<CancellationToken>())
+                .Returns(new UserDTO(user.Id, user.UserName.Value, user.Email.Value, user.Role));
+        }
+        else
+            mediator.Send(Arg.Any<GetUserByUserNameQuery>(), Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("username", username.Value));
+
+        var action = async () => await controller.GetUserByName(username.Value);
+
+        if (exists)
+        {
+            var result = await action();
+            result.Should().BeOfType<OkObjectResult>();
+            await mediator.Received(1).Send(Arg.Any<GetUserByUserNameQuery>(), Arg.Any<CancellationToken>());
         }
         else
             await action.Should().ThrowAsync<UserNotFoundException>();
