@@ -123,7 +123,7 @@ public class UsersControllerTests
         {
             var username = "yonyuk";
             var email = "user@gmail.com";
-            var user = new UserDTO(Guid.NewGuid(),username, email, UserRole.User);
+            var user = new UserDTO(Guid.NewGuid(), username, email, UserRole.User);
 
             mediator.Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>())
                 .Returns(user);
@@ -154,7 +154,7 @@ public class UsersControllerTests
         if (exists)
         {
             var username = "yonyuk";
-            var user = new UserDTO(Guid.NewGuid(),username, email, UserRole.User);
+            var user = new UserDTO(Guid.NewGuid(), username, email, UserRole.User);
 
             mediator.Send(Arg.Any<GetUserByEmailQuery>(), Arg.Any<CancellationToken>())
                 .Returns(user);
@@ -185,7 +185,7 @@ public class UsersControllerTests
         if (exists)
         {
             var email = "user@gmail.com";
-            var user = new UserDTO(Guid.NewGuid(),username, email, UserRole.User);
+            var user = new UserDTO(Guid.NewGuid(), username, email, UserRole.User);
 
             mediator.Send(Arg.Any<GetUserByUserNameQuery>(), Arg.Any<CancellationToken>())
                 .Returns(user);
@@ -213,20 +213,20 @@ public class UsersControllerTests
         var context = new DefaultHttpContext();
         var contextUserMocked = Substitute.For<ClaimsPrincipal>();
         contextUserMocked.FindFirst(ClaimTypes.NameIdentifier)
-            .Returns(new Claim(ClaimTypes.NameIdentifier,id.ToString()));
+            .Returns(new Claim(ClaimTypes.NameIdentifier, id.ToString()));
         context.User = contextUserMocked;
         controller.ControllerContext = new ControllerContext { HttpContext = context };
 
         var username = "yonyuk";
         var email = "user@gmail.com";
 
-        var user = new UserDTO(id,username,email,UserRole.User);
+        var user = new UserDTO(id, username, email, UserRole.User);
 
-        mediator.Send(Arg.Any<GetUserByIdQuery>(),Arg.Any<CancellationToken>()).Returns(user);
+        mediator.Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>()).Returns(user);
 
         var result = await controller.GetCurrentUser();
         result.Should().BeOfType<OkObjectResult>();
-        await mediator.Received(1).Send(Arg.Any<GetUserByIdQuery>(),Arg.Any<CancellationToken>());
+        await mediator.Received(1).Send(Arg.Any<GetUserByIdQuery>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]
@@ -238,7 +238,7 @@ public class UsersControllerTests
         var context = new DefaultHttpContext();
         var contextUserMocked = Substitute.For<ClaimsPrincipal>();
         contextUserMocked.FindFirst(ClaimTypes.NameIdentifier)
-            .Returns(new Claim(ClaimTypes.NameIdentifier,id.ToString()));
+            .Returns(new Claim(ClaimTypes.NameIdentifier, id.ToString()));
         context.User = contextUserMocked;
         controller.ControllerContext = new ControllerContext { HttpContext = context };
 
@@ -249,8 +249,8 @@ public class UsersControllerTests
         };
 
         if (!exists)
-            mediator.Send(Arg.Any<ChangePasswordCommand>(),Arg.Any<CancellationToken>())
-                .ThrowsAsync(new UserNotFoundException("id",id.ToString()));
+            mediator.Send(Arg.Any<ChangePasswordCommand>(), Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("id", id.ToString()));
 
         var action = async () => await controller.ChangePassword(data);
 
@@ -260,10 +260,10 @@ public class UsersControllerTests
         {
             var result = await action();
             result.Should().BeOfType<AcceptedResult>();
-            await mediator.Received(1).Send(Arg.Any<ChangePasswordCommand>(),Arg.Any<CancellationToken>());
+            await mediator.Received(1).Send(Arg.Any<ChangePasswordCommand>(), Arg.Any<CancellationToken>());
         }
     }
-    
+
     [Fact]
     public async Task TestLogout()
     {
@@ -277,10 +277,39 @@ public class UsersControllerTests
         {
             HttpContext = mockedContext
         };
-        
+
         var result = await controller.Logout();
 
         mockedCookies.Received(1).Delete(Arg.Any<string>());
         result.Should().BeOfType<AcceptedResult>();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestUnRegister(bool exists)
+    {
+        var id = Guid.NewGuid();
+        var context = new DefaultHttpContext();
+        var contextUserMocked = Substitute.For<ClaimsPrincipal>();
+        contextUserMocked.FindFirst(ClaimTypes.NameIdentifier)
+            .Returns(new Claim(ClaimTypes.NameIdentifier, id.ToString()));
+        context.User = contextUserMocked;
+        controller.ControllerContext = new ControllerContext { HttpContext = context };
+
+        if (!exists)
+            mediator.Send(Arg.Any<UnRegisterUserCommand>(),Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("id",id.ToString()));
+        
+        var action = async () => await controller.UnRegister();
+
+        if (!exists)
+            await action.Should().ThrowAsync<UserNotFoundException>();
+        else
+        {
+            var result = await action();
+            await mediator.Received(1).Send(Arg.Any<UnRegisterUserCommand>(),Arg.Any<CancellationToken>());
+            result.Should().BeOfType<AcceptedResult>();
+        }
     }
 }
