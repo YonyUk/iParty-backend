@@ -262,6 +262,25 @@ public class UsersControllerTests
             result.Should().BeOfType<AcceptedResult>();
             await mediator.Received(1).Send(Arg.Any<ChangePasswordCommand>(),Arg.Any<CancellationToken>());
         }
+    }
+    
+    [Fact]
+    public async Task TestLogout()
+    {
+        var mockedResponse = Substitute.For<HttpResponse>();
+        var mockedCookies = Substitute.For<IResponseCookies>();
+        var mockedContext = Substitute.For<HttpContext>();
+        mockedContext.Response.Returns(mockedResponse);
+        mockedResponse.Cookies.Returns(mockedCookies);
 
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = mockedContext
+        };
+        
+        var result = await controller.Logout();
+
+        mockedCookies.Received(1).Delete(Arg.Any<string>());
+        result.Should().BeOfType<AcceptedResult>();
     }
 }
