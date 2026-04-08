@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +14,7 @@
     <PackageReference Include="FluentAssertions" Version="8.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Respawn" Version="7.0.0" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -25,6 +27,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Services\Users\Infrastructure\UsersInfrastructure.csproj" />
+    <ProjectReference Include="..\..\..\Services\Users\Application\UsersApplication.csproj" />
+    <ProjectReference Include="..\..\..\Services\Users\Domain\UsersDomain.csproj" />
+    <ProjectReference Include="..\..\..\Services\Users\API\UsersApi.csproj" />
   </ItemGroup>
+
+  <Target Name="RenameDepsFileForWebApplicationFactory" AfterTargets="Build">
+    <ItemGroup>
+      <DepsFile Include="$(OutputPath)$(AssemblyName).deps.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DepsFile)" DestinationFiles="$(OutputPath)testhost.deps.json" Condition="Exists('@(DepsFile)')" />
+  </Target>
 
 </Project>

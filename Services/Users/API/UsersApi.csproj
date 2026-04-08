@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Infrastructure\UsersInfrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TestUsersService" />
+  </ItemGroup>
+
 </Project>

@@ -15,7 +15,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     private readonly PostgreSqlContainer dbContainer;
     public CustomWebApplicationFactory()
     {
-        dbContainer = new PostgreSqlBuilder("postgres:16-alphine")
+        dbContainer = new PostgreSqlBuilder("postgres:16-alpine")
             .WithDatabase("testdb")
             .WithUsername("testuser")
             .WithPassword("testpassword")
