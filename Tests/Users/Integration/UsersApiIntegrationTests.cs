@@ -163,17 +163,22 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData(UserRole.User)]
-    [InlineData(UserRole.Host)]
-    public async Task TestGetUsers(UserRole? role)
+    [InlineData(null,0)]
+    [InlineData(null,1)]
+    [InlineData(UserRole.User,0)]
+    [InlineData(UserRole.User,1)]
+    [InlineData(UserRole.Host,0)]
+    [InlineData(UserRole.Host,1)]
+    public async Task TestGetUsers(UserRole? role,int page)
     {
         await Populate("yonyuk","jose01","brayan","nayeli","lauren","alexander");
-        var response = await client.GetAsync($"/api/users{(role != null ? $"?role={role}" : "")}");
+        var response = await client.GetAsync($"/api/users?page={page}{(role != null ? $"&role={role}" : "")}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var users = await response.Content.ReadFromJsonAsync<UserDTO[]>(enumsSerializerOptions);
         if (role != null)
             users.Should().OnlyContain(user => user.Role == role);
+        if (page != 0)
+            users!.Length.Should().Be(0);
     }
 }
