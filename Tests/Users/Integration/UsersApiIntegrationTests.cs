@@ -1,8 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Renci.SshNet.Sftp;
+using Users.API.Converters;
 using Users.Application.DTOs;
 using Users.Domain;
 
@@ -23,9 +25,30 @@ public enum TestLoginExpectedResult
 }
 public class UsersApiIntegrationTests : UsersBaseIntegrationTests
 {
+    private readonly JsonSerializerOptions enumsSerializerOptions;
     public UsersApiIntegrationTests(CustomWebApplicationFactory applicationFactory) : base(applicationFactory)
     {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        options.Converters.Add(new UserRoleJsonConverter());
+        enumsSerializerOptions = options;
+    }
 
+    async Task CreateUser(string username, UserRole role,string? password = null)
+    {
+        var formData = new Dictionary<string, string>
+        {
+            {"username",username},
+            {"email",$"{username}@gmail.com"},
+            {"password",password ?? $"{username}@password"},
+            {"role",role.ToString()}
+        };
+        using var content = new FormUrlEncodedContent(formData);
+        await client.PostAsync("/api/users/register", content);
+    }
+    async Task Populate(params string[] usernames)
+    {
+        for (int i = 0; i < usernames.Length; i++)
+            await CreateUser(usernames[i], (UserRole)(i & 1));
     }
 
     [Theory]
@@ -90,17 +113,7 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         };
 
         if (expected != TestLoginExpectedResult.UserNotFound)
-        {
-            var registerData = new Dictionary<string, string>
-            {
-                {"username","yonyuk"},
-                {"email","user@gmail.com"},
-                {"password","yony01uk"},
-                {"role","user"}
-            };
-            using var registerContent = new FormUrlEncodedContent(registerData);
-            var registerResponse = await client.PostAsync("/api/users/register", registerContent);
-        }
+            await CreateUser("yonyuk",UserRole.User,"yony01uk");
 
         using var content = new FormUrlEncodedContent(formData);
         var response = await client.PostAsync("/api/users/login", content);
@@ -123,6 +136,29 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
                 response.StatusCode.Should().Be(HttpStatusCode.Accepted);
                 break;
         }
+    }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestGetUserById(bool exists)
+    {
+        await Populate("yonyuk");
+        var response = await client.GetAsync("/api/users");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var users = await response.Content.ReadFromJsonAsync<UserDTO[]>(enumsSerializerOptions);
+        var userId = users![0].Id;
+
+        response = await client.GetAsync($"/api/users/{(exists ? userId.ToString() : Guid.NewGuid().ToString())}");
+
+        if (exists)
+        {
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var user = await response.Content.ReadFromJsonAsync<UserDTO>(enumsSerializerOptions);
+            user.Should().NotBeNull();
+            user.Id.Should().Be(userId);
+        }
+        else
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 }
