@@ -23,6 +23,12 @@ public enum TestLoginExpectedResult
     UserNotFound,
     Unauthorized
 }
+public enum TestChangePasswordExpectedResult
+{
+    Ok = 0,
+    BadRequest,
+    Unauthorized
+}
 public class UsersApiIntegrationTests : UsersBaseIntegrationTests
 {
     private readonly JsonSerializerOptions enumsSerializerOptions;
@@ -33,21 +39,21 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         enumsSerializerOptions = options;
     }
 
-    async Task<string> LoginUser(string username,UserRole role)
+    async Task<string> LoginUser(string username, UserRole role)
     {
-        await CreateUser(username,role);
+        await CreateUser(username, role);
         var formData = new Dictionary<string, string>
         {
             {"username",username},
             {"password",$"{username}@password"}
         };
         using var content = new FormUrlEncodedContent(formData);
-        var response = await client.PostAsync("/api/users/login",content);
-        response.Headers.TryGetValues("Set-Cookie",out var cookies);
+        var response = await client.PostAsync("/api/users/login", content);
+        response.Headers.TryGetValues("Set-Cookie", out var cookies);
         var token = cookies!.FirstOrDefault(c => c.StartsWith("access_token="));
         return token!.Split(";").First();
     }
-    async Task CreateUser(string username, UserRole role,string? password = null)
+    async Task CreateUser(string username, UserRole role, string? password = null)
     {
         var formData = new Dictionary<string, string>
         {
@@ -127,7 +133,7 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         };
 
         if (expected != TestLoginExpectedResult.UserNotFound)
-            await CreateUser("yonyuk",UserRole.User,"yony01uk");
+            await CreateUser("yonyuk", UserRole.User, "yony01uk");
 
         using var content = new FormUrlEncodedContent(formData);
         var response = await client.PostAsync("/api/users/login", content);
@@ -177,15 +183,15 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     }
 
     [Theory]
-    [InlineData(null,0)]
-    [InlineData(null,1)]
-    [InlineData(UserRole.User,0)]
-    [InlineData(UserRole.User,1)]
-    [InlineData(UserRole.Host,0)]
-    [InlineData(UserRole.Host,1)]
-    public async Task TestGetUsers(UserRole? role,int page)
+    [InlineData(null, 0)]
+    [InlineData(null, 1)]
+    [InlineData(UserRole.User, 0)]
+    [InlineData(UserRole.User, 1)]
+    [InlineData(UserRole.Host, 0)]
+    [InlineData(UserRole.Host, 1)]
+    public async Task TestGetUsers(UserRole? role, int page)
     {
-        await Populate("yonyuk","jose01","brayan","nayeli","lauren","alexander");
+        await Populate("yonyuk", "jose01", "brayan", "nayeli", "lauren", "alexander");
         var response = await client.GetAsync($"/api/users?page={page}{(role != null ? $"&role={role}" : "")}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -202,7 +208,7 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     public async Task TestGetUserByName(bool exists)
     {
         if (exists)
-            await CreateUser("yonyuk",UserRole.User);
+            await CreateUser("yonyuk", UserRole.User);
 
         var response = await client.GetAsync($"/api/users/name/yonyuk");
 
@@ -223,8 +229,8 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     public async Task TestGetUserByEmail(bool exists)
     {
         if (exists)
-            await CreateUser("yonyuk",UserRole.User);
-        
+            await CreateUser("yonyuk", UserRole.User);
+
         var response = await client.GetAsync("/api/users/email/yonyuk@gmail.com");
 
         if (exists)
@@ -238,18 +244,18 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     }
 
     [Theory]
-    [InlineData(true,UserRole.User)]
-    [InlineData(true,UserRole.Host)]
-    [InlineData(false,UserRole.User)]
-    [InlineData(false,UserRole.Host)]
+    [InlineData(true, UserRole.User)]
+    [InlineData(true, UserRole.Host)]
+    [InlineData(false, UserRole.User)]
+    [InlineData(false, UserRole.Host)]
     public async Task TestGetCurrentUser(bool logged, UserRole role)
     {
         if (logged)
         {
-            var token = await LoginUser("yonyuk",role);
-            client.DefaultRequestHeaders.Add("Cookie",token);
+            var token = await LoginUser("yonyuk", role);
+            client.DefaultRequestHeaders.Add("Cookie", token);
         }
-        
+
         var response = await client.GetAsync("/api/users/me");
 
         if (logged)
@@ -262,5 +268,44 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         }
         else
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Theory]
+    [InlineData("yony01uk", "yony01uk", TestChangePasswordExpectedResult.Ok)]
+    [InlineData("yony01uk", "yony01uk", TestChangePasswordExpectedResult.Unauthorized)]
+    [InlineData("yony", "yony", TestChangePasswordExpectedResult.BadRequest)]
+    [InlineData("yony01uk", "yony", TestChangePasswordExpectedResult.BadRequest)]
+    public async Task TestChangePassword(string? password, string? confirm, TestChangePasswordExpectedResult expected)
+    {
+        if (expected != TestChangePasswordExpectedResult.Unauthorized)
+        {
+            var token = await LoginUser("yonyuk", UserRole.User);
+            client.DefaultRequestHeaders.Add("Cookie", token);
+        }
+
+        var formData = new Dictionary<string, string>
+        {
+            {"password",password},
+            {"confirm",confirm}
+        };
+
+        using var content = new FormUrlEncodedContent(formData);
+
+        var response = await client.PutAsync("/api/users/me/change_password", content);
+
+        switch (expected)
+        {
+            case TestChangePasswordExpectedResult.Unauthorized:
+                response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+                break;
+
+            case TestChangePasswordExpectedResult.BadRequest:
+                response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+                break;
+
+            default:
+                response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+                break;
+        }
     }
 }
