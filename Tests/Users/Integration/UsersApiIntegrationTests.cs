@@ -181,4 +181,25 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         if (page != 0)
             users!.Length.Should().Be(0);
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestGetUserByName(bool exists)
+    {
+        if (exists)
+            await CreateUser("yonyuk",UserRole.User);
+
+        var response = await client.GetAsync($"/api/users/name/yonyuk");
+
+        if (exists)
+        {
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var user = await response.Content.ReadFromJsonAsync<UserDTO>(enumsSerializerOptions);
+            user!.UserName.Should().Be("yonyuk");
+        }
+        else
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+
+    }
 }
