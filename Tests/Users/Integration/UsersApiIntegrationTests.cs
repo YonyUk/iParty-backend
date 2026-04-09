@@ -33,6 +33,20 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         enumsSerializerOptions = options;
     }
 
+    async Task<string> LoginUser(string username,UserRole role)
+    {
+        await CreateUser(username,role);
+        var formData = new Dictionary<string, string>
+        {
+            {"username",username},
+            {"password",$"{username}@password"}
+        };
+        using var content = new FormUrlEncodedContent(formData);
+        var response = await client.PostAsync("/api/users/login",content);
+        response.Headers.TryGetValues("Set-Cookie",out var cookies);
+        var token = cookies!.FirstOrDefault(c => c.StartsWith("access_token="));
+        return token!.Split(";").First();
+    }
     async Task CreateUser(string username, UserRole role,string? password = null)
     {
         var formData = new Dictionary<string, string>
@@ -221,5 +235,32 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         }
         else
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Theory]
+    [InlineData(true,UserRole.User)]
+    [InlineData(true,UserRole.Host)]
+    [InlineData(false,UserRole.User)]
+    [InlineData(false,UserRole.Host)]
+    public async Task TestGetCurrentUser(bool logged, UserRole role)
+    {
+        if (logged)
+        {
+            var token = await LoginUser("yonyuk",role);
+            client.DefaultRequestHeaders.Add("Cookie",token);
+        }
+        
+        var response = await client.GetAsync("/api/users/me");
+
+        if (logged)
+        {
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var user = await response.Content.ReadFromJsonAsync<UserDTO>(enumsSerializerOptions);
+            user!.UserName.Should().Be("yonyuk");
+            user!.Email.Should().Be("yonyuk@gmail.com");
+            user!.Role.Should().Be(role);
+        }
+        else
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 }
