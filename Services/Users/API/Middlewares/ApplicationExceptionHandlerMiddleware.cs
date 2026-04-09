@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-using System.Net;
-=======
->>>>>>> dev-users-api
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Users.Application.Exceptions;
