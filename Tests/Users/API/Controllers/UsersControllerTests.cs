@@ -55,8 +55,7 @@ public class UsersControllerTests
         var action = async () =>
         {
             var data = new RegisterUserDTO(username, email, password, role);
-            var command = new RegisterUserCommand(data);
-            return await controller.CreateUser(command);
+            return await controller.CreateUser(data);
         };
     }
 
