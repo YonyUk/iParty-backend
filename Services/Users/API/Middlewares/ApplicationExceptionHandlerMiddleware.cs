@@ -1,4 +1,3 @@
-using System.Net;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Users.Application.Exceptions;
@@ -19,7 +18,8 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
         {typeof(InvalidUserNameException),StatusCodes.Status400BadRequest},
         {typeof(InvalidHashedPasswordException),StatusCodes.Status500InternalServerError},
         {typeof(UserAlreadyExistsException),StatusCodes.Status409Conflict},
-        {typeof(UserNotFoundException),StatusCodes.Status404NotFound}
+        {typeof(UserNotFoundException),StatusCodes.Status404NotFound},
+        {typeof(ValidationException),StatusCodes.Status400BadRequest}
     };
     public ApplicationExceptionHandlerMiddleware(ILogger<ApplicationExceptionHandlerMiddleware> logger)
     {
@@ -76,6 +76,7 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
                 Detail = exception.Message,
                 Instance = context.Request.Path,
             };
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(problem);
 
         }
