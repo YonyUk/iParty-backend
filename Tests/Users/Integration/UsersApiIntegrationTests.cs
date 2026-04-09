@@ -308,4 +308,42 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
                 break;
         }
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestLogout(bool logged)
+    {
+        if (logged)
+        {
+            var token = await LoginUser("yonyuk",UserRole.User);
+            client.DefaultRequestHeaders.Add("Cookie",token);
+        }
+
+        var response = await client.DeleteAsync("/api/users/logout");
+
+        if (logged)
+            response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        else
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestUnRegister(bool logged)
+    {
+        if (logged)
+        {
+            var token = await LoginUser("yonyuk",UserRole.User);
+            client.DefaultRequestHeaders.Add("Cookie",token);
+        }
+
+        var response = await client.DeleteAsync("/api/users/me");
+
+        if (logged)
+            response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        else
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
 }
