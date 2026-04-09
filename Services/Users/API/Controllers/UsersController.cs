@@ -29,8 +29,9 @@ namespace Users.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> CreateUser(RegisterUserCommand command)
+        public async Task<IActionResult> CreateUser(RegisterUserDTO data)
         {
+            var command = new RegisterUserCommand(data);
             await mediator.Send(command);
             return Created();
         }
