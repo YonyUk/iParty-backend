@@ -161,4 +161,19 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         else
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(UserRole.User)]
+    [InlineData(UserRole.Host)]
+    public async Task TestGetUsers(UserRole? role)
+    {
+        await Populate("yonyuk","jose01","brayan","nayeli","lauren","alexander");
+        var response = await client.GetAsync($"/api/users{(role != null ? $"?role={role}" : "")}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var users = await response.Content.ReadFromJsonAsync<UserDTO[]>(enumsSerializerOptions);
+        if (role != null)
+            users.Should().OnlyContain(user => user.Role == role);
+    }
 }
