@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Renci.SshNet.Sftp;
 using Users.Application.DTOs;
 using Users.Domain;
 
@@ -11,6 +13,13 @@ public enum TestCreateUserExpectedResult
     Ok = 0,
     BadRequest,
     Conflict
+}
+public enum TestLoginExpectedResult
+{
+    Ok = 0,
+    BadRequest,
+    UserNotFound,
+    Unauthorized
 }
 public class UsersApiIntegrationTests : UsersBaseIntegrationTests
 {
@@ -38,7 +47,7 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
         var response = await client.PostAsJsonAsync("/api/users/register", data);
 
         if (expected == TestCreateUserExpectedResult.Conflict)
-            response = await client.PostAsJsonAsync("api/users/register",data);
+            response = await client.PostAsJsonAsync("api/users/register", data);
 
         switch (expected)
         {
@@ -49,10 +58,33 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
             case TestCreateUserExpectedResult.Conflict:
                 response.StatusCode.Should().Be(HttpStatusCode.Conflict);
                 break;
-                
+
             default:
                 response.StatusCode.Should().Be(HttpStatusCode.Created);
                 break;
         }
+    }
+
+    [Theory]
+    // [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.Ok)]
+    // [InlineData("yony", "yony01uk", TestLoginExpectedResult.BadRequest)]
+    // [InlineData("yonyuk", "yony", TestLoginExpectedResult.BadRequest)]
+    // [InlineData(null, "yony01uk", TestLoginExpectedResult.BadRequest)]
+    // [InlineData("yonyuk", null, TestLoginExpectedResult.BadRequest)]
+    // [InlineData("   ", "yony01uk", TestLoginExpectedResult.BadRequest)]
+    // [InlineData("yonyuk", "   ", TestLoginExpectedResult.BadRequest)]
+    [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.UserNotFound)]
+    // [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.Unauthorized)]
+    public async Task TestLoginUser(string? username,string? password, TestLoginExpectedResult expected)
+    {
+        var formData = new Dictionary<string,string>{
+            {"username",username},
+            {"password",password}
+        };
+        using var content = new FormUrlEncodedContent(formData);
+        var response = await client.PostAsync("/api/users/login",content);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+
     }
 }
