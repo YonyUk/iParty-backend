@@ -10,6 +10,7 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
     private readonly ILogger<ApplicationExceptionHandlerMiddleware> logger;
     private static readonly Dictionary<Type, int> ExceptionStatusCodeMap = new()
     {
+        {typeof(ValidationException),StatusCodes.Status400BadRequest},
         {typeof(RequiredFieldException),StatusCodes.Status400BadRequest},
         {typeof(InvalidUserRoleException),StatusCodes.Status400BadRequest},
         {typeof(InvalidEmailException),StatusCodes.Status400BadRequest},
@@ -45,22 +46,26 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
             var statusCode = ExceptionStatusCodeMap[exception.GetType()];
             context.Response.ContentType = "application/problem+json";
             context.Response.StatusCode = statusCode;
+
             if (exception is ValidationException)
             {
                 var errorsList = ((ValidationException)exception).Errors
-                    .Select(e => new KeyValuePair<string, string[]>(e.PropertyName, new[] { e.ErrorMessage }));
-                var errors = new Dictionary<string, string[]>();
-                foreach (var error in errorsList)
+                    .Select(
+                        e => new KeyValuePair<string, string[]>(
+                            e.PropertyName,
+                            new[] { e.ErrorMessage }
+                        )
+                    );
+                
+                var errors = new Dictionary<string,string[]>();
+                foreach(var error in errorsList)
                 {
                     if (!errors.ContainsKey(error.Key))
                         errors[error.Key] = error.Value;
                     else
                         errors[error.Key] = errors[error.Key].Append(error.Value[0]).ToArray();
                 }
-                var validationProblemDetails = new ValidationProblemDetails()
-                {
-                    Errors = errors
-                };
+                var validationProblemDetails = new ValidationProblemDetails(errors);
                 await context.Response.WriteAsJsonAsync(validationProblemDetails);
                 return;
             }
@@ -69,10 +74,10 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
                 Status = statusCode,
                 Title = exception.GetType().Name,
                 Detail = exception.Message,
-                Instance = context.Request.Path
+                Instance = context.Request.Path,
             };
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(problem);
+
         }
         catch (Exception e)
         {
@@ -84,6 +89,7 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
                 Detail = "An unexpected error has occurred",
                 Instance = context.Request.Path
             };
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(problem);
         }
     }
