@@ -62,10 +62,13 @@ namespace Users.API.Controllers
             return Ok(user);
         }
         [HttpGet]
-        public async Task<IActionResult> GetUsers([FromQuery] UserRole? role = null)
+        public async Task<IActionResult> GetUsers(
+            [FromQuery] int page = 0,
+            [FromQuery] UserRole? role = null
+        )
         {
             var users = await mediator.Send(role != null ? new GetUsersByRoleQuery((UserRole)role) : new GetUsersQuery());
-            return Ok(users);
+            return Ok(((IEnumerable<UserDTO>)users!).Skip(page*100));
         }
         [HttpGet("name/{username}")]
         public async Task<IActionResult> GetUserByName(string username)
