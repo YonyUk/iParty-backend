@@ -18,7 +18,7 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     {
         var data = new RegisterUserDTO("yonyuk","user@gmail.com","yony01uk",UserRole.User);
 
-        var response = await client.PostAsJsonAsync("/api/v1/users/register",data);
+        var response = await client.PostAsJsonAsync("/api/users/register",data);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 }
