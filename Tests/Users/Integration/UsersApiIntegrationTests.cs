@@ -202,4 +202,24 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task TestGetUserByEmail(bool exists)
+    {
+        if (exists)
+            await CreateUser("yonyuk",UserRole.User);
+        
+        var response = await client.GetAsync("/api/users/email/yonyuk@gmail.com");
+
+        if (exists)
+        {
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var user = await response.Content.ReadFromJsonAsync<UserDTO>(enumsSerializerOptions);
+            user!.Email.Should().Be("yonyuk@gmail.com");
+        }
+        else
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }
