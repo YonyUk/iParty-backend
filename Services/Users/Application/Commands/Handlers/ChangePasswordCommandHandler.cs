@@ -7,7 +7,7 @@ using Users.Domain.ValueObjects;
 
 namespace Users.Application.Commands.Handlers;
 
-public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand>
+public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand,Unit>
 {
     private readonly IUserDomainRulesConfigProvider userDomainRulesConfigProvider;
     private readonly IUserRepository userRepository;
@@ -25,11 +25,12 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;
     }
-    public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetById(request.Id,cancellationToken);
         var hashedPassword = new HashedPassword(passwordHasher.Hash(request.password));
         user.ChangePassword(hashedPassword);
         await unitOfWork.Commit(cancellationToken);
+        return Unit.Value;
     }
 }
