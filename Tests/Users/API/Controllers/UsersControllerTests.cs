@@ -113,6 +113,36 @@ public class UsersControllerTests
     }
 
     [Theory]
+    [InlineData(null, 0)]
+    [InlineData(null, 1)]
+    [InlineData(UserRole.User, 0)]
+    [InlineData(UserRole.Host, 0)]
+    public async Task TestGetUsers(UserRole? role, int page)
+    {
+        var fakeUsers = new UserDTO[]
+        {
+            new UserDTO(Guid.NewGuid(),"yonyuk","user@gmail.com",role ?? UserRole.User)
+        };
+        mediator.Send(Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<object?>(fakeUsers)
+            );
+
+        var result = await controller.GetUsers(page, role);
+
+        await mediator.Received(1).Send(Arg.Any<object>(), Arg.Any<CancellationToken>());
+
+        result.Should().BeOfType<OkObjectResult>();
+        var users = (IEnumerable<UserDTO>)((OkObjectResult)result).Value!;
+        if (role != null)
+            users.Should().OnlyContain(user => user.Role == role);
+        if (page == 1)
+            users.Count().Should().Be(0);
+        else
+            users.Count().Should().Be(1);
+    }
+
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task TestGetUserById(bool exists)
@@ -297,9 +327,9 @@ public class UsersControllerTests
         controller.ControllerContext = new ControllerContext { HttpContext = context };
 
         if (!exists)
-            mediator.Send(Arg.Any<UnRegisterUserCommand>(),Arg.Any<CancellationToken>())
-                .ThrowsAsync(new UserNotFoundException("id",id.ToString()));
-        
+            mediator.Send(Arg.Any<UnRegisterUserCommand>(), Arg.Any<CancellationToken>())
+                .ThrowsAsync(new UserNotFoundException("id", id.ToString()));
+
         var action = async () => await controller.UnRegister();
 
         if (!exists)
@@ -307,7 +337,7 @@ public class UsersControllerTests
         else
         {
             var result = await action();
-            await mediator.Received(1).Send(Arg.Any<UnRegisterUserCommand>(),Arg.Any<CancellationToken>());
+            await mediator.Received(1).Send(Arg.Any<UnRegisterUserCommand>(), Arg.Any<CancellationToken>());
             result.Should().BeOfType<AcceptedResult>();
         }
     }
