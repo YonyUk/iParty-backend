@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Users.API.Converters;
 using Users.API.Middlewares;
 using Users.Application.DependencyInjection;
