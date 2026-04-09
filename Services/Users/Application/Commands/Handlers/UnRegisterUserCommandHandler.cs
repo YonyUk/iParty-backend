@@ -4,7 +4,7 @@ using Users.Domain;
 
 namespace Users.Application.Commands.Handlers;
 
-public class UnRegisterUserCommandHandler : IRequestHandler<UnRegisterUserCommand>
+public class UnRegisterUserCommandHandler : IRequestHandler<UnRegisterUserCommand,Unit>
 {
     private readonly IUserRepository userRepository;
     private readonly IUnitOfWork unitOfWork;
@@ -13,9 +13,10 @@ public class UnRegisterUserCommandHandler : IRequestHandler<UnRegisterUserComman
         this.userRepository = userRepository;
         this.unitOfWork = unitOfWork;
     }
-    public async Task Handle(UnRegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UnRegisterUserCommand request, CancellationToken cancellationToken)
     {
         await userRepository.Delete(request.Id,cancellationToken);
         await unitOfWork.Commit(cancellationToken);
+        return Unit.Value;
     }
 }
