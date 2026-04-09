@@ -29,7 +29,7 @@ namespace Users.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> CreateUser(RegisterUserDTO data)
+        public async Task<IActionResult> CreateUser([FromForm] RegisterUserDTO data)
         {
             var command = new RegisterUserCommand(data);
             await mediator.Send(command);
