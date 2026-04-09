@@ -43,11 +43,18 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     [InlineData("yonyuk", "user@gmail.com", "yony01uk", UserRole.User, TestCreateUserExpectedResult.Conflict)]
     public async Task TestCreateUser(string? username, string? email, string? password, UserRole role, TestCreateUserExpectedResult expected)
     {
-        var data = new RegisterUserDTO(username, email, password, role);
-        var response = await client.PostAsJsonAsync("/api/users/register", data);
+        var formData = new Dictionary<string, string>
+        {
+            {"username",username},
+            {"email",email},
+            {"password",password},
+            {"role",role == UserRole.User ? "user" : "host"}
+        };
+        using var content = new FormUrlEncodedContent(formData);
+        var response = await client.PostAsync("/api/users/register", content);
 
         if (expected == TestCreateUserExpectedResult.Conflict)
-            response = await client.PostAsJsonAsync("api/users/register", data);
+            response = await client.PostAsync("api/users/register", content);
 
         switch (expected)
         {
@@ -66,25 +73,56 @@ public class UsersApiIntegrationTests : UsersBaseIntegrationTests
     }
 
     [Theory]
-    // [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.Ok)]
-    // [InlineData("yony", "yony01uk", TestLoginExpectedResult.BadRequest)]
-    // [InlineData("yonyuk", "yony", TestLoginExpectedResult.BadRequest)]
-    // [InlineData(null, "yony01uk", TestLoginExpectedResult.BadRequest)]
-    // [InlineData("yonyuk", null, TestLoginExpectedResult.BadRequest)]
-    // [InlineData("   ", "yony01uk", TestLoginExpectedResult.BadRequest)]
-    // [InlineData("yonyuk", "   ", TestLoginExpectedResult.BadRequest)]
+    [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.Ok)]
+    [InlineData("yony", "yony01uk", TestLoginExpectedResult.BadRequest)]
+    [InlineData("yonyuk", "yony", TestLoginExpectedResult.BadRequest)]
+    [InlineData(null, "yony01uk", TestLoginExpectedResult.BadRequest)]
+    [InlineData("yonyuk", null, TestLoginExpectedResult.BadRequest)]
+    [InlineData("   ", "yony01uk", TestLoginExpectedResult.BadRequest)]
+    [InlineData("yonyuk", "   ", TestLoginExpectedResult.BadRequest)]
     [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.UserNotFound)]
-    // [InlineData("yonyuk", "yony01uk", TestLoginExpectedResult.Unauthorized)]
-    public async Task TestLoginUser(string? username,string? password, TestLoginExpectedResult expected)
+    [InlineData("yonyuk", "yony02uk", TestLoginExpectedResult.Unauthorized)]
+    public async Task TestLoginUser(string? username, string? password, TestLoginExpectedResult expected)
     {
-        var formData = new Dictionary<string,string>{
+        var formData = new Dictionary<string, string>{
             {"username",username},
             {"password",password}
         };
-        using var content = new FormUrlEncodedContent(formData);
-        var response = await client.PostAsync("/api/users/login",content);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        if (expected != TestLoginExpectedResult.UserNotFound)
+        {
+            var registerData = new Dictionary<string, string>
+            {
+                {"username","yonyuk"},
+                {"email","user@gmail.com"},
+                {"password","yony01uk"},
+                {"role","user"}
+            };
+            using var registerContent = new FormUrlEncodedContent(registerData);
+            var registerResponse = await client.PostAsync("/api/users/register", registerContent);
+        }
+
+        using var content = new FormUrlEncodedContent(formData);
+        var response = await client.PostAsync("/api/users/login", content);
+
+        switch (expected)
+        {
+            case TestLoginExpectedResult.UserNotFound:
+                response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+                break;
+
+            case TestLoginExpectedResult.BadRequest:
+                response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+                break;
+
+            case TestLoginExpectedResult.Unauthorized:
+                response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+                break;
+
+            default:
+                response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+                break;
+        }
 
     }
 }

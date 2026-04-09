@@ -10,6 +10,7 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
     private readonly ILogger<ApplicationExceptionHandlerMiddleware> logger;
     private static readonly Dictionary<Type, int> ExceptionStatusCodeMap = new()
     {
+        {typeof(ValidationException),StatusCodes.Status400BadRequest},
         {typeof(RequiredFieldException),StatusCodes.Status400BadRequest},
         {typeof(InvalidUserRoleException),StatusCodes.Status400BadRequest},
         {typeof(InvalidEmailException),StatusCodes.Status400BadRequest},
@@ -17,8 +18,7 @@ public class ApplicationExceptionHandlerMiddleware : IMiddleware
         {typeof(InvalidUserNameException),StatusCodes.Status400BadRequest},
         {typeof(InvalidHashedPasswordException),StatusCodes.Status500InternalServerError},
         {typeof(UserAlreadyExistsException),StatusCodes.Status409Conflict},
-        {typeof(UserNotFoundException),StatusCodes.Status404NotFound},
-        {typeof(ValidationException),StatusCodes.Status400BadRequest}
+        {typeof(UserNotFoundException),StatusCodes.Status404NotFound}
     };
     public ApplicationExceptionHandlerMiddleware(ILogger<ApplicationExceptionHandlerMiddleware> logger)
     {
