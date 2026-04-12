@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: iParty_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourdbpassword
+      POSTGRES_DB: users_db
+    ports:
+      - "5001:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  users_api:
+    build:
+      context: .
+      dockerfile: ./Services/Users/API/Dockerfile
+    container_name: iParty_users_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=postgres_db;Port=5432;Database=users_db;Username=postgres;Password=yourdbpassword
+      - Jwt__SecretKey=your_super_secret_security_key_for_user_authentication_on_the_app_throw_jwt_bearer
+      - Jwt__Issuer=users-service
+      - Jwt__Audience=your_web_app
+    ports:
+      - "5000:8080"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  api_gateway:
+    build:
+      context: .
+      dockerfile: ./API_Gateaway/Dockerfile
+    container_name: iParty_gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ReverseProxy__Clusters__users-cluster__Destinations__users-dest__Address=http://users_api:8080
+      - Security__Jwt__SecretKey=your_super_secret_security_key_for_user_authentication_on_the_app_throw_jwt_bearer
+      - Security__Jwt__Issuer=users-service
+      - Security__Jwt__Audience=your_web_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - users_api
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge
