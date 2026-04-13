@@ -15,6 +15,7 @@ using Users.Infrastructure.Persistence.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Npgsql;
 
 namespace Users.Infrastructure.DependencyInjection;
 
@@ -41,7 +42,9 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>((sp,options) =>
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            var rawConnectionString = configuration.GetConnectionString("DefaultConnection");
+            var csBuilder = new NpgsqlConnectionStringBuilder(rawConnectionString);
+            var connectionString = csBuilder.ConnectionString;
             var dbOptions = sp.GetRequiredService<IOptions<DatabaseConfigOptions>>().Value;
 
             options.UseNpgsql(connectionString,npgsqlOptions =>
