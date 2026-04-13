@@ -18,10 +18,4 @@ RUN dotnet publish "UsersApi.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-
-# Copia el script de inicio y da permisos de ejecución
-COPY start.sh .
-RUN chmod +x start.sh
-
-# Establece el script como punto de entrada
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["dotnet", "UsersApi.dll"]
