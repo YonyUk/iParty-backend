@@ -21,7 +21,7 @@ app.UseAuthorization();
 app.UseRateLimiter();
 app.MapHealthChecks("/health");
 
-app.MapGet("/ingo", () => Results.Ok(new
+app.MapGet("/info", () => Results.Ok(new
 {
     GateAway = "Yarp",
     Status = "Running",
