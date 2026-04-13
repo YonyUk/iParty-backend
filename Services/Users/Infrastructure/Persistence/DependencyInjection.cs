@@ -43,6 +43,8 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>((sp,options) =>
         {
             var rawConnectionString = configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(rawConnectionString) || string.IsNullOrWhiteSpace(rawConnectionString))
+                rawConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
             var csBuilder = new NpgsqlConnectionStringBuilder(rawConnectionString);
             var connectionString = csBuilder.ConnectionString;
             var dbOptions = sp.GetRequiredService<IOptions<DatabaseConfigOptions>>().Value;
