@@ -45,6 +45,7 @@ public static class DependencyInjection
             var rawConnectionString = configuration.GetConnectionString("DefaultConnection");
             if (string.IsNullOrEmpty(rawConnectionString) || string.IsNullOrWhiteSpace(rawConnectionString))
                 rawConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+            System.Console.WriteLine($"Connection string: {rawConnectionString}");
             var csBuilder = new NpgsqlConnectionStringBuilder(rawConnectionString);
             var connectionString = csBuilder.ConnectionString;
             var dbOptions = sp.GetRequiredService<IOptions<DatabaseConfigOptions>>().Value;
