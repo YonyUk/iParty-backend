@@ -31,7 +31,9 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: ConnectionStrings__DefaultConnection
-        value:  Host={{ postgres.host }};Port={{ postgres.port }};Database={{ postgres.database }};Username={{ postgres.user }};Password={{ postgres.password }};SSL Mode=Require;Trust Server Certificate=true;
+        fromDatabase:
+          name: users_db
+          property: connectionString
       - key: Jwt__SecretKey
         fromService:
           name: iparty-gateway
