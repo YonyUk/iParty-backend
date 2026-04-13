@@ -21,7 +21,7 @@ services:
     healthCheckPath: /info
 
   # Service for Users API (Private)
-  - type: pserv
+  - type: web
     name: iparty-users-api
     runtime: docker
     repo: https://github.com/YonyUk/iParty-backend
