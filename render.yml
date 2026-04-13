@@ -4,7 +4,7 @@ services:
   - type: web
     name: iparty-gateway
     runtime: docker
-    repo: https://github.com/YonyUk/iParty-backend
+    repo: https://github.com/YonyUk/iParty-backend.git
     dockerfilePath: ./API_Gateaway/Dockerfile
     plan: free
     envVars:
@@ -24,7 +24,7 @@ services:
   - type: web
     name: iparty-users-api
     runtime: docker
-    repo: https://github.com/YonyUk/iParty-backend
+    repo: https://github.com/YonyUk/iParty-backend.git
     dockerfilePath: ./Services/Users/API/Dockerfile
     plan: free
     envVars:
