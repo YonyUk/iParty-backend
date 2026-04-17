@@ -7,7 +7,4 @@ public record ChangePasswordDTO
 {
     [Required]
     public string Password { get; init; } = string.Empty;
-    [Required]
-    [Compare("Password",ErrorMessage = "Passwords doesn't matches")]
-    public string Confirm { get; init; } = string.Empty;
 }
