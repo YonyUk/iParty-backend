@@ -273,8 +273,7 @@ public class UsersControllerTests
 
         var data = new ChangePasswordDTO
         {
-            Password = "new password",
-            Confirm = "new password"
+            Password = "new password"
         };
 
         if (!exists)
