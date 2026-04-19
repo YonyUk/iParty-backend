@@ -65,6 +65,28 @@ public static class DependencyInjection
         });
         return services;
     }
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services,string policyName)
+    {
+        using var scope = services.BuildServiceProvider().CreateScope();
+        var corsOptions = scope.ServiceProvider.GetRequiredService<IOptions<CorsConfigOptions>>().Value;
+        foreach(var org in corsOptions.AllowedOrigins)
+            System.Console.WriteLine(org);
+        services.AddCors(options =>
+        {
+            options.AddPolicy(policyName,policy =>
+            {
+                if (corsOptions.AllowedOrigins.Any())
+                    policy.WithOrigins(corsOptions.AllowedOrigins);
+                if (corsOptions.AllowedCredentials)
+                    policy.AllowCredentials();
+                if (corsOptions.AllowedHeader)
+                    policy.AllowAnyHeader();
+                if (corsOptions.AllowedMethod)
+                    policy.AllowAnyMethod();
+            });
+        });
+        return services;
+    }
     public static IServiceCollection AddReverseProxyService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddReverseProxy()
